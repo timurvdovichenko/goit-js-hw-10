@@ -23,13 +23,14 @@ function onSearchInput(evt) {
   const inputCountryValue = evt.target.value.trim();
 
   if (inputCountryValue === '') {
+    resetAllView();
     return;
   } else {
     fetchCountries(inputCountryValue)
       .then(countries => {
         if (countries.length > 10) {
           console.log('numbers of countries', countries.length - 1);
-          Notify.failure('Too many matches found. Please enter a more specific name.');
+          Notify.info('Too many matches found. Please enter a more specific name.');
           resetAllView();
         } else if (countries.length > 1 && countries.length <= 10) {
           const markup = countries.reduce((acc, country) => {
@@ -44,7 +45,11 @@ function onSearchInput(evt) {
         }
       })
       .catch(err => {
-        console.error(err), Notify.failure('Oops, there is no country with that name');
+        console.dir(err.message);
+        if (err.message === '404') {
+          Notify.failure('Oops, there is no country with that name');
+          resetAllView();
+        }
       });
   }
 }
@@ -64,7 +69,7 @@ function onCountryMarkup({ flags, name, capital, population, languages }) {
   <div>
   <p><b style="margin-right: 10px">Capital:</b>${capital}</p>
   <p><b style="margin-right: 10px">Population:</b>${population}</p>
-  <p><b style="margin-right: 10px">Languages:</b>${Object.values(languages)}</p>
+  <p><b style="margin-right: 10px">Languages:</b>${Object.values(languages).join(', ')}</p>
   </div>`;
 }
 
